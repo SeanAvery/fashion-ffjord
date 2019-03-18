@@ -27,7 +27,7 @@ def fetch_data():
     data_transform = transforms.Compose([ transforms.ToTensor() ])   
 
     data_loader = DataLoader(
-            datasets.MNIST(root='.data/mnist', train=True, download=True, transform=data_transform),
+            datasets.MNIST(root='./data/mnist', train=True, download=True, transform=data_transform),
             batch_size=1000,
             shuffle=True,
             num_workers=4,

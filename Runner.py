@@ -5,6 +5,8 @@ import torchvision.transforms as transforms
 import logging
 import os
 
+from ODE import ODEFunc, ODEBlock, conv, norm
+
 def setup_logger(displaying=True, saving=False, debug=False):
     # instantiate logger object
     logger = logging.getLogger()
@@ -39,5 +41,6 @@ if __name__ == '__main__':
     # 2. fetch data
     fetch_data()
     # 3. setup network
+    network = [ODEBlock(ODEFunc(64))]
     # 4. run training
     # 5. save model

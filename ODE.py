@@ -5,7 +5,7 @@ class ODEFunc(nn.Module):
     def __init__(self, dim):
         super(ODEFunc, self).__init__()
         self.norm1 = norm(dim)
-        self.relu = nn.RELU(inplace=True)
+        self.relu = nn.ReLU(inplace=True)
 
 class ODEBlock(nn.Module):
     def __init__(self, odefunc):

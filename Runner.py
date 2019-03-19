@@ -5,7 +5,7 @@ import torchvision.transforms as transforms
 import logging
 import os
 
-from ODE import ODEFunc, ODEBlock, conv, norm
+from ODE import ODEFunc, ODEBlock, downsample_layers
 from hyperparams import get_hyperparams
 
 def setup_logger(displaying=True, saving=False, debug=False):
@@ -44,6 +44,7 @@ if __name__ == '__main__':
     # 2. fetch data
     fetch_data()
     # 3. setup network
-    network = [ODEBlock(ODEFunc(64), hyperparams['tol'])]
+    downsampling_layers = downsample_layers()
+    feature_layers = [ODEBlock(ODEFunc(64), hyperparams['tol'])]
     # 4. run training
     # 5. save model

@@ -82,6 +82,7 @@ def fc_layers():
         Flatten(),
         nn.Linear(64, 10)
     ]
+    return layers
 
 class Flatten(nn.Module):
     def __init__(self):

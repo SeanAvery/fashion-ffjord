@@ -6,6 +6,7 @@ import logging
 import os
 
 from ODE import ODEFunc, ODEBlock, conv, norm
+from hyperparams import get_hyperparams
 
 def setup_logger(displaying=True, saving=False, debug=False):
     # instantiate logger object
@@ -36,11 +37,13 @@ def fetch_data():
             drop_last=True)
 
 if __name__ == '__main__':
+    hyperparams = get_hyperparams()
+
     # 1. setup logger
     setup_logger()
     # 2. fetch data
     fetch_data()
     # 3. setup network
-    network = [ODEBlock(ODEFunc(64))]
+    network = [ODEBlock(ODEFunc(64), hyperparams['tol'])]
     # 4. run training
     # 5. save model

@@ -72,3 +72,21 @@ def downsample_layers():
         nn.ReLU(inplace=True),
         nn.Conv2d(64, 64, 4, 2, 1),
     ]
+    return layers
+
+def fc_layers():
+    layers = [
+        norm(64),
+        nn.ReLU(inplace=True),
+        nn.AdaptiveAvgPool2d((1, 1)),
+        Flatten(),
+        nn.Linear(64, 10)
+    ]
+
+class Flatten(nn.Module):
+    def __init__(self):
+        super(Flatten, self).__init__()
+
+    def forward(self, x):
+        shape = torch.prod(torch.tensor(x.shapep[1:])).item()
+        return x.view(-1, shape)

@@ -1,11 +1,12 @@
 import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 import logging
 import os
 
-from ODE import ODEFunc, ODEBlock, downsample_layers
+from ODE import ODEFunc, ODEBlock, downsample_layers, fc_layers
 from hyperparams import get_hyperparams
 
 def setup_logger(displaying=True, saving=False, debug=False):
@@ -46,5 +47,7 @@ if __name__ == '__main__':
     # 3. setup network
     downsampling_layers = downsample_layers()
     feature_layers = [ODEBlock(ODEFunc(64), hyperparams['tol'])]
+    fc_layers = fc_layers()
+    model = nn.Sequential(*downsampling_layers, *feature_layers, *fc_layers)
     # 4. run training
     # 5. save model

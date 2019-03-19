@@ -36,18 +36,32 @@ def fetch_data():
             shuffle=True,
             num_workers=4,
             drop_last=True)
+    return data_loader
+
+def inf_generator(iterable):
+    iterator.iterable.__iter__()
+    while True:
+        try: 
+            yield iterator.__next__()
+        except StopIteration:
+            iterator = iterable.__iter__()
 
 if __name__ == '__main__':
     hyperparams = get_hyperparams()
 
     # 1. setup logger
     setup_logger()
+    
     # 2. fetch data
-    fetch_data()
+    data_loader = fetch_data()
+    
     # 3. setup network
     downsampling_layers = downsample_layers()
     feature_layers = [ODEBlock(ODEFunc(64), hyperparams['tol'])]
     fc_layers = fc_layers()
     model = nn.Sequential(*downsampling_layers, *feature_layers, *fc_layers)
+    
     # 4. run training
+    data_gen = inf_generator(data_loader)
+
     # 5. save model

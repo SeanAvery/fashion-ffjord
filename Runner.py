@@ -5,6 +5,7 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 import logging
 import os
+import numpy as np
 
 from ODE import ODEFunc, ODEBlock, downsample_layers, fc_layers
 from hyperparams import get_hyperparams
@@ -51,6 +52,17 @@ def inf_generator(iterable):
 def learning_rate_decay(lr, batch_size, batch_denom, batches_per_opoch, boundary_epochs, decay_rates):
     initial_learning_rate = lr * batch_size / batch_denom
 
+    boundaries = [int(batches_per_epoch * epoch) for epoch in boundary_epochs]
+
+    vals = [initial_learning_rate * decay for decay in decay_rates]
+
+    def learning_rate_fn(itr):
+        lt = [itr < b for b in boundaries] + [True]
+        i = np.argmax(lt)
+        return vals[i]
+
+    return learning_rate_fn
+
 if __name__ == '__main__':
     hyperparams = get_hyperparams()
 
@@ -70,7 +82,6 @@ if __name__ == '__main__':
     logger.info(model)
     
     # 4. run training
-    dprint(batches_per_epoch)
     learning_rate = learning_rate_decay(
         lr=hyperparams['lr'],
         batch_size=hyperparams['batch_size'],
@@ -82,4 +93,10 @@ if __name__ == '__main__':
             model.parameters(),
             hyperparams['lr'])
     
+    for itr in range(hyperparams['nepochs'] * batches_per_epoch):
+        
+        for param_group in optimizer.param_groups:
+            print(param_group)
+            param_group['lr'] = learning_rate(itr)
+         
     # 5. save model

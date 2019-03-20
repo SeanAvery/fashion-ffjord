@@ -8,5 +8,6 @@ def get_hyperparams():
         'save': True,
         'display': True,
         'lr': 0.1,
+        'nepochs': 160,
     }
     return hyperparams

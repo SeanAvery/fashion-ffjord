@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torchdiffeq import odeint_adjoint as odeint
 
 class ODEFunc(nn.Module):
     def __init__(self, dim):
@@ -30,7 +31,7 @@ class ODEBlock(nn.Module):
         self.tol = tol
         self.integration_time = torch.tensor([0, 1]).float()
 
-    def forward():
+    def forward(self, x):
         self.integration_time = self.integration_time.type_as(x)
         out = odeint(self.odefunc, x, self.integration_time, rtol=self.tol, atol=self.tol)
         return out[1]
@@ -89,5 +90,5 @@ class Flatten(nn.Module):
         super(Flatten, self).__init__()
 
     def forward(self, x):
-        shape = torch.prod(torch.tensor(x.shapep[1:])).item()
+        shape = torch.prod(torch.tensor(x.shape[1:])).item()
         return x.view(-1, shape)

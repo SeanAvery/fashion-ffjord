@@ -3,9 +3,10 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
+import numpy as np
 import logging
 import os
-import numpy as np
+import time
 
 from ODE import ODEFunc, ODEBlock, downsample_layers, fc_layers
 from hyperparams import get_hyperparams
@@ -63,6 +64,22 @@ def learning_rate_decay(lr, batch_size, batch_denom, batches_per_opoch, boundary
 
     return learning_rate_fn
 
+class RunningAverageMeter(object):
+    def __init__(self, momentum=0.99):
+        self.momentum = momentum
+        self.reset()
+    
+    def reset(self):
+        self.val = None
+        self.avg = 0
+
+    def update(self, val):
+        if self.val is None:
+            self.avg = val
+        else:
+            self.avg = self.avg * self.momentum + val * (1 - self.momentum)
+        self.val = val
+
 if __name__ == '__main__':
     hyperparams = get_hyperparams()
     device = 'cpu' # running on macbook for now
@@ -93,8 +110,11 @@ if __name__ == '__main__':
     optimizer = torch.optim.SGD(
             model.parameters(),
             hyperparams['lr'])
-    criterion = nn.CrossEntropyLoss().to(device)
     
+    criterion = nn.CrossEntropyLoss().to(device)
+    batch_time_meter = RunningAverageMeter()
+    end = time.time()
+
     for itr in range(hyperparams['nepochs'] * batches_per_epoch):
         
         for param_group in optimizer.param_groups:
@@ -110,5 +130,9 @@ if __name__ == '__main__':
         nfe_forward = feature_layers[0].nfe
         feature_layers[0].nfe = 0
         
-        
+        loss.backward()
+        optimizer.step()
+
+        batch_time_meter.update(tim.time() - end)
+           
     # 5. save model

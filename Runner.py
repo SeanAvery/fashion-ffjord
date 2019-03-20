@@ -65,6 +65,7 @@ def learning_rate_decay(lr, batch_size, batch_denom, batches_per_opoch, boundary
 
 if __name__ == '__main__':
     hyperparams = get_hyperparams()
+    device = 'cpu' # running on macbook for now
 
     # 1. setup logger
     logger = setup_logger()
@@ -92,6 +93,7 @@ if __name__ == '__main__':
     optimizer = torch.optim.SGD(
             model.parameters(),
             hyperparams['lr'])
+    criterion = nn.CrossEntropyLoss().to(device)
     
     for itr in range(hyperparams['nepochs'] * batches_per_epoch):
         
@@ -100,5 +102,13 @@ if __name__ == '__main__':
         
         optimizer.zero_grad()
         x, y = data_gen.__next__()
+        x = x.to(device)
+        y = y.to(device)
+        logits = model(x)
+        loss = criterion(logits, y)
 
+        nfe_forward = feature_layers[0].nfe
+        feature_layers[0].nfe = 0
+        
+        
     # 5. save model

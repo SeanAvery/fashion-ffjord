@@ -80,6 +80,21 @@ class RunningAverageMeter(object):
             self.avg = self.avg * self.momentum + val * (1 - self.momentum)
         self.val = val
 
+def accuracy(model, data_loader):
+    total_correct = 0
+    for x, y in data_loader:
+        x = x.to(device)
+        y = one_hot(np.array(y.numpy()), 10)
+
+        target_class = np.argmax(y, axis=1)
+        predicted_class = np.argmax(model(x).cpu().detach().numpy(), axis=1)
+        total_correct = np.sum(predicted_class == target_class)
+    return total_correct / len(data_loader.dataset)
+
+def one_hot(x, K):
+    return np.array(xp[:, None] == np.arange(K)[None, :], dtype=int)
+
+
 if __name__ == '__main__':
     hyperparams = get_hyperparams()
     device = 'cpu' # running on macbook for now
@@ -113,6 +128,8 @@ if __name__ == '__main__':
     
     criterion = nn.CrossEntropyLoss().to(device)
     batch_time_meter = RunningAverageMeter()
+    f_nfe_meter = RunningAverageMeter()
+    b_nfe_meter = RunningAverageMeter()
     end = time.time()
 
     for itr in range(hyperparams['nepochs'] * batches_per_epoch):
@@ -132,7 +149,19 @@ if __name__ == '__main__':
         
         loss.backward()
         optimizer.step()
+        
+        nfe_backward = feature_layers[0].nfe
+        feature_layers[0].nfe = 0
 
         batch_time_meter.update(tim.time() - end)
-           
+
+        f_nfe_meter.update(nfe_forward)
+        b_nfe_meter.update(nfe_backward)
+
+        end = time.time()
+        
+        if itr % batches_per_epoch == 0:
+            with torch.no_grad():
+                print('yolo')
+
     # 5. save model

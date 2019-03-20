@@ -48,6 +48,9 @@ def inf_generator(iterable):
         except StopIteration:
             iterator = iterable.__iter__()
 
+def learning_rate_decay(lr, batch_size, batch_denom, batches_per_opoch, boundary_epochs, decay_rates):
+    initial_learning_rate = lr * batch_size / batch_denom
+
 if __name__ == '__main__':
     hyperparams = get_hyperparams()
 
@@ -57,16 +60,24 @@ if __name__ == '__main__':
     # 2. fetch data
     data_loader = fetch_data()
     data_gen = inf_generator(data_loader)
+    
     # 3. setup network
     downsampling_layers = downsample_layers()
     feature_layers = [ODEBlock(ODEFunc(64), hyperparams['tol'])]
     fc_layers = fc_layers()
     model = nn.Sequential(*downsampling_layers, *feature_layers, *fc_layers)
-
     logger.info(model)
     
     # 4. run training
     data_gen = inf_generator(data_loader)
     batches_per_epoch = len(data_loader)
-    
+    print(batches_per_epoch)
+    learning_rate = learning_rate_decay(
+        lr=hyperparams['lr'],
+        batch_size=hyperparams['batch_size'],
+        batch_denom=128,
+        batches_per_opoch=batches_per_epoch,
+        boundary_epochs=[60, 100, 140],
+        decay_rates=[1, 0.1, 0.01, 0.001])
+
     # 5. save model

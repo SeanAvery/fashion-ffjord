@@ -6,6 +6,7 @@ def get_hyperparams():
         'test_batch_size': 1000,
         'tol': 1e-3, # type float
         'save': True,
-        'display': True
+        'display': True,
+        'lr': 0.1,
     }
     return hyperparams

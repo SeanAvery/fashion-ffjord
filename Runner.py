@@ -42,9 +42,9 @@ def fetch_data():
     return data_loader
 
 def inf_generator(iterable):
-    iterator.iterable.__iter__()
+    iterator = iterable.__iter__()
     while True:
-        try: 
+        try:
             yield iterator.__next__()
         except StopIteration:
             iterator = iterable.__iter__()
@@ -96,7 +96,9 @@ if __name__ == '__main__':
     for itr in range(hyperparams['nepochs'] * batches_per_epoch):
         
         for param_group in optimizer.param_groups:
-            print(param_group)
             param_group['lr'] = learning_rate(itr)
-         
+        
+        optimizer.zero_grad()
+        x, y = data_gen.__next__()
+
     # 5. save model

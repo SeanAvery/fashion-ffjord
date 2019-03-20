@@ -26,6 +26,8 @@ def setup_logger(displaying=True, saving=False, debug=False):
         console_handler.setLevel(level)
         logger.addHandler(console_handler)
 
+    return logger
+
 def fetch_data():
     # setup tensor transformer
     data_transform = transforms.Compose([ transforms.ToTensor() ])   
@@ -50,18 +52,21 @@ if __name__ == '__main__':
     hyperparams = get_hyperparams()
 
     # 1. setup logger
-    setup_logger()
+    logger = setup_logger()
     
     # 2. fetch data
     data_loader = fetch_data()
-    
+    data_gen = inf_generator(data_loader)
     # 3. setup network
     downsampling_layers = downsample_layers()
     feature_layers = [ODEBlock(ODEFunc(64), hyperparams['tol'])]
     fc_layers = fc_layers()
     model = nn.Sequential(*downsampling_layers, *feature_layers, *fc_layers)
+
+    logger.info(model)
     
     # 4. run training
     data_gen = inf_generator(data_loader)
-
+    batches_per_epoch = len(data_loader)
+    
     # 5. save model

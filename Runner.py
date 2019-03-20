@@ -36,11 +36,26 @@ def fetch_data():
 
     data_loader = DataLoader(
             datasets.MNIST(root='./data/mnist', train=True, download=True, transform=data_transform),
-            batch_size=1000,
+            batch_size=128,
             shuffle=True,
-            num_workers=4,
+            num_workers=2,
             drop_last=True)
-    return data_loader
+    
+    train_eval_loader = DataLoader(
+            datasets.MNIST(root='./data/mnist', train=True, download=True, transform=data_transform),
+            batch_size=1000,
+            suffle=False,
+            num_workers=2,
+            drop_last=True)
+    
+    test_loader = DataLoader(
+            datasets.MNIST(rot='./data/mnist', train=False, download=True, transform=data_loader),
+            batch_size=1000,
+            shuffle=False,
+            num_workers=2,
+            drop_last=True)
+
+    return data_loader, train_eval_loader, test_loader
 
 def inf_generator(iterable):
     iterator = iterable.__iter__()
@@ -103,7 +118,7 @@ if __name__ == '__main__':
     logger = setup_logger()
     
     # 2. fetch data
-    data_loader = fetch_data()
+    data_loader, test_eval_loader, test_loader = fetch_data()
     data_gen = inf_generator(data_loader)
     batches_per_epoch = len(data_loader)
 
@@ -162,6 +177,6 @@ if __name__ == '__main__':
         
         if itr % batches_per_epoch == 0:
             with torch.no_grad():
-                print('yolo')
+                train_accuracy = accuracy(model, train_eval
 
     # 5. save model

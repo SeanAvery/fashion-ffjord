@@ -60,7 +60,8 @@ if __name__ == '__main__':
     # 2. fetch data
     data_loader = fetch_data()
     data_gen = inf_generator(data_loader)
-    
+    batches_per_epoch = len(data_loader)
+
     # 3. setup network
     downsampling_layers = downsample_layers()
     feature_layers = [ODEBlock(ODEFunc(64), hyperparams['tol'])]
@@ -69,9 +70,7 @@ if __name__ == '__main__':
     logger.info(model)
     
     # 4. run training
-    data_gen = inf_generator(data_loader)
-    batches_per_epoch = len(data_loader)
-    print(batches_per_epoch)
+    dprint(batches_per_epoch)
     learning_rate = learning_rate_decay(
         lr=hyperparams['lr'],
         batch_size=hyperparams['batch_size'],
@@ -79,5 +78,8 @@ if __name__ == '__main__':
         batches_per_opoch=batches_per_epoch,
         boundary_epochs=[60, 100, 140],
         decay_rates=[1, 0.1, 0.01, 0.001])
-
+    optimizer = torch.optim.SGD(
+            model.parameters(),
+            hyperparams['lr'])
+    
     # 5. save model

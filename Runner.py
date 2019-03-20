@@ -44,12 +44,12 @@ def fetch_data():
     train_eval_loader = DataLoader(
             datasets.MNIST(root='./data/mnist', train=True, download=True, transform=data_transform),
             batch_size=1000,
-            suffle=False,
+            shuffle=False,
             num_workers=2,
             drop_last=True)
     
     test_loader = DataLoader(
-            datasets.MNIST(rot='./data/mnist', train=False, download=True, transform=data_loader),
+            datasets.MNIST(root='./data/mnist', train=False, download=True, transform=data_loader),
             batch_size=1000,
             shuffle=False,
             num_workers=2,
@@ -103,11 +103,11 @@ def accuracy(model, data_loader):
 
         target_class = np.argmax(y, axis=1)
         predicted_class = np.argmax(model(x).cpu().detach().numpy(), axis=1)
-        total_correct = np.sum(predicted_class == target_class)
+        total_correct += np.sum(predicted_class == target_class)
     return total_correct / len(data_loader.dataset)
 
 def one_hot(x, K):
-    return np.array(xp[:, None] == np.arange(K)[None, :], dtype=int)
+    return np.array(x[:, None] == np.arange(K)[None, :], dtype=int)
 
 
 if __name__ == '__main__':
@@ -118,7 +118,7 @@ if __name__ == '__main__':
     logger = setup_logger()
     
     # 2. fetch data
-    data_loader, test_eval_loader, test_loader = fetch_data()
+    data_loader, train_eval_loader, test_loader = fetch_data()
     data_gen = inf_generator(data_loader)
     batches_per_epoch = len(data_loader)
 
@@ -146,9 +146,9 @@ if __name__ == '__main__':
     f_nfe_meter = RunningAverageMeter()
     b_nfe_meter = RunningAverageMeter()
     end = time.time()
-
+    logger.info('### starting training:')
     for itr in range(hyperparams['nepochs'] * batches_per_epoch):
-        
+        logger.info('### starting epoch: {}'.format(itr))
         for param_group in optimizer.param_groups:
             param_group['lr'] = learning_rate(itr)
         
@@ -168,7 +168,7 @@ if __name__ == '__main__':
         nfe_backward = feature_layers[0].nfe
         feature_layers[0].nfe = 0
 
-        batch_time_meter.update(tim.time() - end)
+        batch_time_meter.update(time.time() - end)
 
         f_nfe_meter.update(nfe_forward)
         b_nfe_meter.update(nfe_backward)
@@ -176,7 +176,18 @@ if __name__ == '__main__':
         end = time.time()
         
         if itr % batches_per_epoch == 0:
+            logger.info('### end of epic')
+            logger.info( '### calculating accuracy')
             with torch.no_grad():
-                train_accuracy = accuracy(model, train_eval
+                train_acc = accuracy(model, train_eval_loader)
+                logger.info('### train acc: {}'.format(train_acc))
+                val_acc = accuracy(model, test_loader)
+                logger.info('### valuation accuracy: {}'.format(val_acc))
+                logger.info(
+                    "Epoch {:04d} | Time {:.3f} ({:.3f}) | NFE-F {:.1f} | NFE-B {:.1f} | "
+                    "Train Acc {:.4f} | Test Acc {:.4f}".format(
+                        itr // batches_per_epoch, batch_time_meter.val, batch_time_meter.avg, f_nfe_meter.avg,
+                        b_nfe_meter.avg, train_acc, val_acc)
+                    )
 
     # 5. save model

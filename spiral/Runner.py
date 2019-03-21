@@ -33,6 +33,22 @@ class ODEFunc(nn.Module):
         def forward(self, t, y):
             return self.net(y**3)
 
+class RunningAverageMeter(object):
+    def __init__( self, momentum=0.99):
+        self.momentum = momentum
+        self.reset()
+
+    def reset(self):
+        self.val = None
+        self.avg = 0
+
+    def update(self, val):
+        if self.val is None:
+            self.avg = val
+        else:
+            self.avg = self.avg * self.momentum + val * (1 - self.momentum)
+        self.val = val
+
 if __name__ == '__main__':
     i = 0
     device = 'cpu' # running on macbook rn
@@ -47,8 +63,10 @@ if __name__ == '__main__':
     func = ODEFunc()
     optimizer = optim.RMSprop(func.parameters(), lr=1e-3)   
     end = time.time()
-
     
+    time_meter = RunningAverageMeter(0.97)
+    loss_meter = RunningAverageMeter(0.97)
+
 
 
 

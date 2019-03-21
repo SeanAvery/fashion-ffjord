@@ -95,15 +95,16 @@ class RunningAverageMeter(object):
             self.avg = self.avg * self.momentum + val * (1 - self.momentum)
         self.val = val
 
-def accuracy(model, data_loader):
+def accuracy(model, data_loader, logger):
     total_correct = 0
     for x, y in data_loader:
         x = x.to(device)
         y = one_hot(np.array(y.numpy()), 10)
-
+        
         target_class = np.argmax(y, axis=1)
         predicted_class = np.argmax(model(x).cpu().detach().numpy(), axis=1)
         total_correct += np.sum(predicted_class == target_class)
+        logger.info('### total correct summation: {}'.format(total_correct))
     return total_correct / len(data_loader.dataset)
 
 def one_hot(x, K):
@@ -179,9 +180,9 @@ if __name__ == '__main__':
             logger.info('### end of epic')
             logger.info( '### calculating accuracy')
             with torch.no_grad():
-                train_acc = accuracy(model, train_eval_loader)
+                train_acc = accuracy(model, train_eval_loader, logger)
                 logger.info('### train acc: {}'.format(train_acc))
-                val_acc = accuracy(model, test_loader)
+                val_acc = accuracy(model, test_loader, logger)
                 logger.info('### valuation accuracy: {}'.format(val_acc))
                 logger.info(
                     "Epoch {:04d} | Time {:.3f} ({:.3f}) | NFE-F {:.1f} | NFE-B {:.1f} | "

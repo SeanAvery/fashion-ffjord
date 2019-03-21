@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import os
+import time
 import matplotlib.pyplot as plt
 
 def create_visualizer():
@@ -34,10 +35,23 @@ class ODEFunc(nn.Module):
 
 if __name__ == '__main__':
     i = 0
-
+    device = 'cpu' # running on macbook rn
+    true_y = torch.tensor([[2., 0.]])
+    t = torch.linspace(0., 25., 1000) # data size 1000 
+    true_A = torch.tensor([[-0.1, 2.0], [-2.0, -0.1]]) 
+    
     # 1. create visualizer
     create_visualizer()
 
     # 2. create ode net
     func = ODEFunc()
+    optimizer = optim.RMSprop(func.parameters(), lr=1e-3)   
+    end = time.time()
+
     
+
+
+
+
+
+
